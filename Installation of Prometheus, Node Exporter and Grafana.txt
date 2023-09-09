@@ -1,0 +1,64 @@
+# Follow steps one by one
+# Prometheus Installation and Node Exporter Installation
+
+sudo tee /etc/yum.repos.d/prometheus.repo <<EOF 
+[prometheus]
+name=prometheus
+baseurl=https://packagecloud.io/prometheus-rpm/release/el/7/x86_64
+repo_gpgcheck=1
+enabled=1
+gpgkey=https://packagecloud.io/prometheus-rpm/release/gpgkey
+       https://raw.githubusercontent.com/lest/prometheus-rpm/master/RPM-GPG-KEY-prometheus-rpm
+gpgcheck=1
+metadata_expire=300
+EOF
+
+
+sudo yum -y install prometheus2 node_exporter
+
+rpm -qi prometheus2
+
+sudo systemctl restart prometheus node_exporter
+
+sudo systemctl enable prometheus node_exporter
+
+systemctl status prometheus.service node_exporter.service
+
+sudo nano /etc/prometheus/prometheus.yml
+
+scrape_configs:
+  - job_name: "ec2"
+    static_configs:
+      - targets: ["localhost:9100"]          #change IP from 9090 to 9100
+
+
+sudo systemctl restart prometheus node_exporter
+
+
+
+
+# Grafana Installation
+
+sudo yum update -y
+
+sudo rpm --import https://packages.grafana.com/gpg.key
+
+sudo tee /etc/yum.repos.d/grafana.repo <<EOF
+[grafana]
+name=grafana
+baseurl=https://packages.grafana.com/oss/rpm
+repo_gpgcheck=1
+enabled=1
+gpgcheck=1
+gpgkey=https://packages.grafana.com/gpg.key
+sslverify=1
+sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+EOF
+
+sudo yum install grafana -y
+
+sudo systemctl start grafana-server
+
+sudo systemctl enable grafana-server
+
+sudo systemctl status grafana-server
